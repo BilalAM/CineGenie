@@ -1,6 +1,6 @@
 package bam.movies.suggestion.ai;
 
-import bam.movies.controller.MovieView;
+import bam.movies.suggestion.controller.MovieView;
 
 import java.util.List;
 

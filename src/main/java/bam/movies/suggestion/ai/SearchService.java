@@ -1,10 +1,10 @@
 package bam.movies.suggestion.ai;
 
 
-import bam.movies.controller.MovieView;
 import bam.movies.entity.Movie;
+import bam.movies.suggestion.MovieSearchService;
 import bam.movies.suggestion.SearchFilters;
-import bam.movies.suggestion.SearchService;
+import bam.movies.suggestion.controller.MovieView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -15,11 +15,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class SearchAiService {
-    private static final Logger log = LoggerFactory.getLogger(SearchAiService.class);
+public class SearchService {
+    private static final Logger log = LoggerFactory.getLogger(SearchService.class);
+    private static final List<String> POPULAR_GENRES = List.of("Thriller", "Action", "Adventure", "Fantasy", "Suspense");
+
     private final ChatClient chatClient;
     private final MovieSearchTool movieSearchTool;
-    private final SearchService searchService;
+    private final MovieSearchService movieSearchService;
 
     private static final String QUERY_GENERATOR_PROMTP = """
             You are a movie recommendation assistant for a personal movie library stored in a database.
@@ -192,11 +194,11 @@ public class SearchAiService {
             """;
 
 
-    public SearchAiService(ChatClient.Builder chatClient,
-                           MovieSearchTool tool,
-                           SearchService searchService) {
+    public SearchService(ChatClient.Builder chatClient,
+                         MovieSearchTool tool,
+                         MovieSearchService movieSearchService) {
         this.movieSearchTool = tool;
-        this.searchService = searchService;
+        this.movieSearchService = movieSearchService;
         this.chatClient = chatClient
                 .defaultSystem(QUERY_GENERATOR_PROMTP)
                 .defaultTools(tool)
@@ -229,7 +231,7 @@ public class SearchAiService {
                     .filter(Objects::nonNull)
                     .toList();
 
-            final Map<Long, Movie> moviesById = searchService.findAllByIds(ids).stream()
+            final Map<Long, Movie> moviesById = movieSearchService.findAllByIds(ids).stream()
                     .collect(Collectors.toMap(Movie::getId, Function.identity()));
 
             final List<MovieView> hydrated = aiPicks.picks().stream()
@@ -244,21 +246,25 @@ public class SearchAiService {
         } catch (Exception e) {
             // in any case we fail, just return empty result along with random popular movies from the list.
             log.error("Failed to fetch AI picks, going to return random popular movies.", e);
-            return new RecommendationResult("No matches found.", fetchRandomPopularPicks());
+            return fetchRandomPopularMovies("Could not find any matches, however here are some popular movies from the archives");
         }
     }
 
+    public RecommendationResult fetchRandomPopularMovies(String message) {
+        return new RecommendationResult(message, fetchRandomPopularPicks());
+    }
+
     private List<MovieView> fetchRandomPopularPicks() {
-        final List<MovieView> allPopularOnes = searchService
+        final List<MovieView> allPopularOnes = movieSearchService
                 .search(new SearchFilters(
-                        null,
-                        null,
+                        POPULAR_GENRES,
+                        SearchFilters.GenreMode.ANY,
                         null,
                         null,
                         null,
                         null,
                         SearchFilters.SortMode.HIGHEST_RATED,
-                        50
+                        20
                 ))
                 .stream()
                 .map(movie -> MovieView.from(movie, null))

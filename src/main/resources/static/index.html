@@ -3,17 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What should I watch?</title>
+    <title>CineMuse — what should I watch?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-base: #0e1020;
+            --bg-deep: #08091a;
+            --bg-surface: rgba(255, 255, 255, 0.04);
+            --bg-surface-strong: rgba(255, 255, 255, 0.06);
+            --border-soft: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.14);
+
+            --text-primary: #f5f1ea;
+            --text-secondary: #a8a4b8;
+            --text-muted: #6c6880;
+
+            --accent-amber: #f3b74e;
+            --accent-amber-soft: rgba(243, 183, 78, 0.16);
+            --accent-amber-glow: rgba(243, 183, 78, 0.35);
+
+            --accent-violet: #a78bfa;
+            --accent-violet-soft: rgba(167, 139, 250, 0.18);
+            --accent-violet-glow: rgba(167, 139, 250, 0.4);
+
+            --error: #ff8a8a;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html, body { height: 100%; }
+
         body {
-            background: #0e0e10;
-            color: #f5f5f7;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            color: var(--text-primary);
+            background:
+                radial-gradient(ellipse 80% 60% at 50% -10%, rgba(167, 139, 250, 0.12), transparent 60%),
+                radial-gradient(ellipse 60% 50% at 90% 110%, rgba(243, 183, 78, 0.08), transparent 70%),
+                linear-gradient(180deg, var(--bg-base) 0%, var(--bg-deep) 100%);
+            background-attachment: fixed;
             min-height: 100vh;
-            padding: 48px 20px;
+            padding: 56px 20px 80px;
             line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
         main {
@@ -21,113 +58,210 @@
             margin: 0 auto;
         }
 
-        h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 4px;
-            letter-spacing: -0.02em;
+        /* ─── Brand / Hero ─── */
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px 5px 8px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-soft);
+            border-radius: 999px;
+            margin-bottom: 28px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
         }
 
-        .subtitle {
-            color: #888;
-            margin-bottom: 28px;
-            font-size: 14px;
+        .brand-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent-violet);
+            box-shadow: 0 0 12px var(--accent-violet-glow);
+            animation: pulse 2.8s ease-in-out infinite;
         }
+
+        .brand-name {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.005em;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(36px, 5vw, 52px);
+            font-weight: 600;
+            line-height: 1.05;
+            letter-spacing: -0.025em;
+            margin-bottom: 14px;
+        }
+
+        h1 .accent {
+            background: linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-violet) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lede {
+            color: var(--text-secondary);
+            font-size: 16px;
+            max-width: 580px;
+            margin-bottom: 36px;
+        }
+
+        /* ─── Form ─── */
 
         form {
             display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 14px;
+            position: relative;
+        }
+
+        .input-wrap {
+            flex: 1;
+            position: relative;
         }
 
         #query {
-            flex: 1;
-            background: #1a1a1d;
-            border: 1px solid #2a2a2e;
-            color: #f5f5f7;
-            padding: 14px 16px;
-            border-radius: 10px;
+            width: 100%;
+            background: var(--bg-surface-strong);
+            border: 1px solid var(--border-soft);
+            color: var(--text-primary);
+            padding: 16px 18px;
+            border-radius: var(--radius-md);
             font-size: 15px;
             outline: none;
             font-family: inherit;
-            transition: border-color 0.15s ease;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
         }
 
-        #query:focus { border-color: #6e6eff; }
+        #query::placeholder { color: var(--text-muted); }
+        #query:hover:not(:focus) { border-color: var(--border-strong); }
+        #query:focus {
+            border-color: var(--accent-violet);
+            box-shadow: 0 0 0 4px var(--accent-violet-soft);
+            background: rgba(255, 255, 255, 0.06);
+        }
 
         button {
-            background: #6e6eff;
-            color: white;
+            background: linear-gradient(135deg, var(--accent-amber) 0%, #e89c2a 100%);
+            color: #1a1108;
             border: none;
-            padding: 14px 24px;
-            border-radius: 10px;
+            padding: 16px 28px;
+            border-radius: var(--radius-md);
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             font-family: inherit;
-            transition: background 0.15s ease;
+            transition: transform 0.12s ease, box-shadow 0.18s ease, opacity 0.15s ease;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15) inset, 0 6px 18px -6px var(--accent-amber-glow);
+            letter-spacing: 0.005em;
         }
 
-        button:hover:not(:disabled) { background: #5959ff; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 10px 24px -6px var(--accent-amber-glow);
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ─── Example chips ─── */
+
+        .examples-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin: 26px 0 12px;
+            font-weight: 500;
+        }
 
         .examples {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin-bottom: 24px;
+            margin-bottom: 32px;
         }
 
         .example-chip {
-            background: #1a1a1d;
-            border: 1px solid #2a2a2e;
-            color: #aaa;
-            padding: 6px 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-soft);
+            color: var(--text-secondary);
+            padding: 8px 14px;
             border-radius: 999px;
             font-size: 13px;
             cursor: pointer;
             font-family: inherit;
             font-weight: 400;
-            transition: border-color 0.15s ease, color 0.15s ease;
+            transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease, transform 0.12s ease;
         }
 
         .example-chip:hover {
-            border-color: #6e6eff;
-            color: #d0d0d8;
+            border-color: var(--accent-violet);
+            color: var(--text-primary);
+            background: var(--accent-violet-soft);
+            transform: translateY(-1px);
         }
+
+        /* ─── Status ─── */
 
         #status {
             font-size: 14px;
-            color: #888;
-            margin-bottom: 16px;
-            min-height: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+            min-height: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .loading::before {
-            content: '';
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 2px solid #2a2a2e;
-            border-top-color: #6e6eff;
+        .loading-dots {
+            display: inline-flex;
+            gap: 5px;
+        }
+        .loading-dots span {
+            width: 7px; height: 7px;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-            vertical-align: -2px;
+            background: var(--accent-violet);
+            box-shadow: 0 0 8px var(--accent-violet-glow);
+            animation: bounce 1.2s ease-in-out infinite;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+            40% { transform: translateY(-5px); opacity: 1; }
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-text { color: var(--error); }
 
-        .error { color: #ff7a7a; }
+        /* ─── Message box (no results / fallback) ─── */
 
         .message-box {
-            background: #1a1a1d;
-            border: 1px solid #2a2a2e;
-            padding: 16px 20px;
-            border-radius: 12px;
-            color: #ccc;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-soft);
+            padding: 18px 22px;
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
             margin-bottom: 16px;
+            font-size: 15px;
         }
+
+        /* ─── Result cards ─── */
 
         .results {
             display: flex;
@@ -136,75 +270,112 @@
         }
 
         .movie-card {
-            background: #1a1a1d;
-            border: 1px solid #2a2a2e;
-            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-lg);
             overflow: hidden;
             display: flex;
-            transition: border-color 0.15s ease;
+            transition: border-color 0.2s ease, transform 0.18s ease, box-shadow 0.2s ease;
+            opacity: 0;
+            animation: fadeIn 0.45s ease forwards;
         }
 
-        .movie-card:hover { border-color: #4a4a4e; }
+        .movie-card:nth-child(1) { animation-delay: 0.04s; }
+        .movie-card:nth-child(2) { animation-delay: 0.10s; }
+        .movie-card:nth-child(3) { animation-delay: 0.16s; }
+        .movie-card:nth-child(4) { animation-delay: 0.22s; }
+        .movie-card:nth-child(5) { animation-delay: 0.28s; }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(8px); }
+        }
+
+        .movie-card:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+            box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.6);
+        }
 
         .poster {
-            width: 140px;
-            min-width: 140px;
-            background: #0a0a0c;
+            width: 160px;
+            min-width: 160px;
+            background: var(--bg-deep);
             object-fit: cover;
             align-self: stretch;
+            border-right: 1px solid var(--border-soft);
         }
 
         .poster.placeholder {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #444;
-            font-size: 32px;
+            color: var(--text-muted);
+            font-size: 36px;
+            background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(243,183,78,0.06));
         }
 
         .info {
-            padding: 16px 20px;
+            padding: 18px 22px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             flex: 1;
             min-width: 0;
         }
 
         .header-row {
             display: flex;
-            align-items: baseline;
+            align-items: flex-start;
             justify-content: space-between;
-            gap: 12px;
+            gap: 14px;
         }
 
+        .title-block { min-width: 0; }
+
         .title {
-            font-size: 17px;
+            font-family: 'Fraunces', serif;
+            font-size: 19px;
             font-weight: 600;
-            color: #f5f5f7;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+            line-height: 1.25;
         }
 
         .year {
-            color: #888;
+            color: var(--text-muted);
             font-weight: 400;
-            font-size: 15px;
+            font-size: 16px;
+            margin-left: 4px;
         }
 
         .rating {
-            color: #f5c451;
-            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--accent-amber-soft);
+            color: var(--accent-amber);
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
             font-weight: 600;
             white-space: nowrap;
+            border: 1px solid rgba(243, 183, 78, 0.25);
         }
 
-        .rating.unrated { color: #555; }
+        .rating.unrated {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            border-color: var(--border-soft);
+        }
 
         .reason {
-            color: #d8d8e0;
+            color: #ddd5e5;
             font-size: 14px;
             font-style: italic;
-            border-left: 2px solid #6e6eff;
-            padding-left: 10px;
+            border-left: 2px solid var(--accent-violet);
+            padding: 2px 0 2px 12px;
+            line-height: 1.55;
         }
 
         .meta {
@@ -215,71 +386,95 @@
         }
 
         .chip {
-            background: #2a2a2e;
-            color: #aaa;
-            padding: 3px 9px;
+            background: rgba(243, 183, 78, 0.10);
+            color: #e6c98a;
+            padding: 3px 10px;
             border-radius: 999px;
             font-size: 11px;
+            font-weight: 500;
+            border: 1px solid rgba(243, 183, 78, 0.18);
+            letter-spacing: 0.01em;
         }
 
         .runtime {
-            color: #777;
+            color: var(--text-muted);
             font-size: 12px;
+            margin-left: 2px;
         }
 
         .plot {
-            color: #b0b0b8;
-            font-size: 13px;
-            line-height: 1.55;
+            color: var(--text-secondary);
+            font-size: 13.5px;
+            line-height: 1.6;
         }
 
         .cast {
-            color: #888;
+            color: var(--text-muted);
             font-size: 12px;
         }
 
         .cast strong {
-            color: #aaa;
+            color: var(--text-secondary);
             font-weight: 500;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 640px) {
+            body { padding: 32px 16px 56px; }
             .movie-card { flex-direction: column; }
-            .poster { width: 100%; min-width: 0; height: 240px; }
+            .poster { width: 100%; min-width: 0; height: 220px; border-right: none; border-bottom: 1px solid var(--border-soft); }
+            form { flex-direction: column; }
+            button { padding: 14px; }
         }
 
         .footer {
-            margin-top: 48px;
+            margin-top: 56px;
             text-align: center;
-            color: #555;
-            font-size: 12px;
+            color: var(--text-muted);
+            font-size: 11px;
+            letter-spacing: 0.04em;
         }
+
+        .footer .dot { margin: 0 6px; opacity: 0.5; }
     </style>
 </head>
 <body>
 <main>
-    <h1>What should I watch?</h1>
-    <p class="subtitle">Describe what you're in the mood for.</p>
+    <div class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-name">CineMuse</span>
+    </div>
+
+    <h1>What should we<br><span class="accent">watch tonight?</span></h1>
+    <p class="lede">
+        A natural-language curator for your private film library. Ask by mood, theme, genre, or vibe — the AI reads your shelf and picks for you.
+    </p>
 
     <form id="form">
-        <input id="query" type="text"
-               placeholder="e.g. thriller with famous actors, not too scary"
-               autocomplete="off" autofocus>
+        <div class="input-wrap">
+            <input id="query" type="text"
+                   placeholder="e.g. thriller with famous actors, not too scary"
+                   aria-label="Describe what you want to watch"
+                   autocomplete="off" autofocus>
+        </div>
         <button id="submit" type="submit">Ask</button>
     </form>
 
+    <div class="examples-label">Try one of these</div>
     <div class="examples">
         <button type="button" class="example-chip">movie about dreams</button>
         <button type="button" class="example-chip">obscure underrated thrillers</button>
         <button type="button" class="example-chip">comedy AND horror</button>
         <button type="button" class="example-chip">the best fantasy movies</button>
         <button type="button" class="example-chip">bad rated romance</button>
+        <button type="button" class="example-chip">something like Memento</button>
     </div>
 
     <div id="status"></div>
     <div id="results"></div>
 
-    <p class="footer">/askMe → SearchAiService → Gemini + your library</p>
+    <p class="footer">
+        powered by your library<span class="dot">·</span>curated by AI
+    </p>
 </main>
 
 <script>
@@ -300,29 +495,43 @@
         e.preventDefault();
         const q = queryInput.value.trim();
         if (!q) return;
+        await fetchRecommendations('/askMe?query=' + encodeURIComponent(q), 'Thinking…');
+    });
 
+    async function fetchRecommendations(url, loadingText) {
         resultsEl.innerHTML = '';
-        statusEl.textContent = 'Thinking…';
-        statusEl.className = 'loading';
+        showLoading(loadingText);
         submitBtn.disabled = true;
 
         try {
-            const res = await fetch('/askMe?query=' + encodeURIComponent(q));
+            const res = await fetch(url);
             if (!res.ok) {
                 const body = await res.text().catch(() => '');
                 throw new Error(`${res.status} ${res.statusText}${body ? ' — ' + truncate(body, 200) : ''}`);
             }
             const data = await res.json();
-            statusEl.textContent = '';
-            statusEl.className = '';
+            clearStatus();
             renderResult(data);
         } catch (err) {
-            statusEl.textContent = 'Error: ' + err.message;
-            statusEl.className = 'error';
+            statusEl.innerHTML = `<span class="error-text">${escapeHtml(err.message)}</span>`;
         } finally {
             submitBtn.disabled = false;
         }
-    });
+    }
+
+    // Initial page load — fetch a curated set of popular picks
+    fetchRecommendations('/recommended', 'Loading recommendations…');
+
+    function showLoading(label = 'Thinking…') {
+        statusEl.innerHTML = `
+            <span class="loading-dots"><span></span><span></span><span></span></span>
+            <span>${escapeHtml(label)}</span>
+        `;
+    }
+
+    function clearStatus() {
+        statusEl.innerHTML = '';
+    }
 
     function renderResult(data) {
         const parts = [];
@@ -350,7 +559,7 @@
             ? `<img class="poster" src="${escapeHtml(m.posterUrl)}" alt="${escapeHtml(m.title || '')}" onerror="this.outerHTML='<div class=&quot;poster placeholder&quot;>🎬</div>'">`
             : `<div class="poster placeholder">🎬</div>`;
 
-        const year = m.year != null ? `<span class="year">(${m.year})</span>` : '';
+        const year = m.year != null ? `<span class="year">${m.year}</span>` : '';
         const ratingHtml = m.tmdbRating != null && m.tmdbRating > 0
             ? `<span class="rating">★ ${m.tmdbRating.toFixed(1)}</span>`
             : `<span class="rating unrated">unrated</span>`;
@@ -370,7 +579,9 @@
                 ${poster}
                 <div class="info">
                     <div class="header-row">
-                        <div class="title">${escapeHtml(m.title || 'Untitled')} ${year}</div>
+                        <div class="title-block">
+                            <span class="title">${escapeHtml(m.title || 'Untitled')}</span> ${year}
+                        </div>
                         ${ratingHtml}
                     </div>
                     ${reason}

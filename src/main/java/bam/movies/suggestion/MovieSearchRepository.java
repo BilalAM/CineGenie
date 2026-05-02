@@ -11,7 +11,7 @@ import java.util.List;
 public interface MovieSearchRepository extends JpaRepository<Movie, Long> {
 
     @Query("""
-                SELECT m FROM Movie m
+                SELECT DISTINCT m FROM Movie m
                 WHERE m.status = :status
                   AND m.guessedType = 'movie'
                   AND (:tmdbRating IS NULL OR m.tmdbRating >= :tmdbRating)

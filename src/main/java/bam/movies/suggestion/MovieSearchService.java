@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-public class SearchService {
+public class MovieSearchService {
 
     private static final int DEFAULT_LIMIT = 15;
 
     private final MovieSearchRepository repository;
 
-    public SearchService(MovieSearchRepository repository) {
+    public MovieSearchService(MovieSearchRepository repository) {
         this.repository = repository;
     }
 
-    public List<Movie> search(@NotNull final SearchFilters filters) {
+    public List<Movie> search(@Nullable final SearchFilters filters) {
         final Sort sort = buildSort(filters.sortMode());
 
         final List<Movie> rows = repository.searchByScalarFilters(
@@ -56,7 +56,7 @@ public class SearchService {
         };
     }
 
-    private boolean matchesSortMode(@NotNull final Movie movie, @NotNull final SearchFilters.SortMode mode) {
+    private boolean matchesSortMode(@NotNull final Movie movie, @Nullable final SearchFilters.SortMode mode) {
         if (mode == SearchFilters.SortMode.LOWEST_RATED) {
             return movie.getTmdbRating() != null && movie.getTmdbRating() > 0;
         }

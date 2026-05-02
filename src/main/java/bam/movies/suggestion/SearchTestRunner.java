@@ -9,10 +9,10 @@ import java.util.List;
 @Component
 public class SearchTestRunner implements CommandLineRunner {
 
-    private final SearchService searchService;
+    private final MovieSearchService movieSearchService;
 
-    public SearchTestRunner(SearchService searchService) {
-        this.searchService = searchService;
+    public SearchTestRunner(MovieSearchService movieSearchService) {
+        this.movieSearchService = movieSearchService;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class SearchTestRunner implements CommandLineRunner {
     private void runQuery(String label, SearchFilters filters) {
         System.out.println();
         System.out.println("--- " + label + " ---");
-        List<Movie> results = searchService.search(filters);
+        List<Movie> results = movieSearchService.search(filters);
         if (results.isEmpty()) {
             System.out.println("(no results)");
             return;

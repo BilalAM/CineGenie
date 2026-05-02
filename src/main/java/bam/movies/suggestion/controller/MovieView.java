@@ -1,4 +1,4 @@
-package bam.movies.controller;
+package bam.movies.suggestion.controller;
 
 import bam.movies.entity.Movie;
 

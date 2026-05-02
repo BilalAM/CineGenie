@@ -1,8 +1,7 @@
 package bam.movies.suggestion.ai;
 
-import bam.movies.entity.Movie;
 import bam.movies.suggestion.SearchFilters;
-import bam.movies.suggestion.SearchService;
+import bam.movies.suggestion.MovieSearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
@@ -15,12 +14,12 @@ import java.util.stream.Collectors;
 @Component
 public class MovieSearchTool {
 
-    private final SearchService searchService;
+    private final MovieSearchService movieSearchService;
     private final Logger log = LoggerFactory.getLogger(MovieSearchTool.class);
 
 
-    public MovieSearchTool(SearchService searchService) {
-        this.searchService = searchService;
+    public MovieSearchTool(MovieSearchService movieSearchService) {
+        this.movieSearchService = movieSearchService;
     }
 
     @Tool(description = """
@@ -98,7 +97,7 @@ public class MovieSearchTool {
                 genres, genreMode, excludeGenres, minRating, titleLike, topic, sortMode, limit
         );
         log.info("Tool called with [  {}  ]", filters);
-        List<MovieToolResult> results = searchService.search(filters).stream()
+        List<MovieToolResult> results = movieSearchService.search(filters).stream()
                 .map(MovieToolResult::from)
                 .collect(Collectors.toList());
         log.info("Returning {} movies to LLM", results.size());
