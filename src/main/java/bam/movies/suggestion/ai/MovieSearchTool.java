@@ -1,16 +1,18 @@
 package bam.movies.suggestion.ai;
 
-import bam.movies.suggestion.SearchFilters;
 import bam.movies.suggestion.MovieSearchService;
+import bam.movies.suggestion.SearchFilters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("LoggingSimilarMessage")
 @Component
 public class MovieSearchTool {
 
@@ -96,11 +98,60 @@ public class MovieSearchTool {
         final SearchFilters filters = new SearchFilters(
                 genres, genreMode, excludeGenres, minRating, titleLike, topic, sortMode, limit
         );
-        log.info("Tool called with [  {}  ]", filters);
-        List<MovieToolResult> results = movieSearchService.search(filters).stream()
+        log.info("Tool {} called with [  {}  ]", Thread.currentThread().getStackTrace()[1].getMethodName(), filters);
+        final List<MovieToolResult> results = movieSearchService.search(filters).stream()
                 .map(MovieToolResult::from)
                 .collect(Collectors.toList());
         log.info("Returning {} movies to LLM", results.size());
         return results;
     }
+
+    @Tool(description = """
+             Find movies in the user's library that are similar to a given reference title.
+             Use this whenever the user asks for movies LIKE another movie — e.g.
+             "movies like Interstellar", "Inception-style films", "something similar to Memento",
+             "Saltburn type movies", "in the vein of The Prestige".
+
+             The tool resolves the reference movie by title, then returns up to 10 OTHER
+             movies that share genres with it (the reference movie itself is excluded).
+             Returns an empty list if the reference movie is NOT in the user's archive.
+
+             Do NOT pair this with search_movies for the same query — this tool returns
+             the complete candidate set on its own.
+            """)
+    public List<MovieToolResult> findSimilarMovies(@ToolParam(required = true, description = """
+             The reference movie's title. Pass only the most distinguishing words, lowercase.
+             Examples: "interstellar", "memento", "lord of the rings", "saltburn".
+             Strip articles and noise: "the prestige" → "prestige" is fine; "interstellar 2014" → "interstellar".
+            """) String title) {
+        log.info("Tool {} called called with [  {}  ]", Thread.currentThread().getStackTrace()[1].getMethodName(), title);
+        final MovieToolResult firstMatching = movieSearchService.search(
+                        new SearchFilters(
+                                null, null, null, null, title, null, null, null
+                        )
+                )
+                .stream()
+                .map(MovieToolResult::from)
+                .findFirst()
+                .orElse(null);
+        if (firstMatching == null) {
+            return Collections.emptyList();
+        }
+        final SearchFilters filters = new SearchFilters(
+                firstMatching.genres(),
+                SearchFilters.GenreMode.ANY,
+                null,
+                null,
+                null,
+                null,
+                SearchFilters.SortMode.POPULAR_FIRST,
+                10
+        );
+        return movieSearchService.search(filters)
+                .stream()
+                // we do not want to return the movie that the user originally mentioned as what they want similar for.
+                .filter(movie -> !movie.getTitle().toLowerCase().contains(title.toLowerCase()))
+                .map(MovieToolResult::from).toList();
+    }
+
 }

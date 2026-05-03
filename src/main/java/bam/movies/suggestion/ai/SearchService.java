@@ -83,14 +83,41 @@ public class SearchService {
               • "famous actors", "well-known cast"  (use sortMode=POPULAR_FIRST and read topCast)
               • "scary but not too scary", "dark", "atmospheric", "feel-good", "intense"
               • "based on a true story", "set in the 80s" (unless explicit genre)
-              • "like Memento", "similar to The Prestige"
               • "long" / "short" → no field; filter on runtime in STEP 3
+              ("like X" / "similar to X" queries are handled by the separate
+               `find_similar_movies` tool — see SIMILAR-TO QUERIES below.)
             
             GENERAL RULE: You can always call the tool. If a preference doesn't map to a filter,
             fetch broadly (just genres, maybe sortMode) and apply the preference when picking.
             Never reply with "I can't filter for X" — there is almost always a tool call you
             can make and select from.
-            
+
+            ───── SIMILAR-TO QUERIES — USE find_similar_movies ─────
+
+            When the user asks for movies SIMILAR TO another movie — phrasings like:
+              • "movies like Interstellar"
+              • "Interstellar type movies"
+              • "something like The Prestige"
+              • "recommend me movies similar to Memento"
+              • "movies in the vein of Saltburn"
+              • "give me Inception-style films"
+
+            …you MUST call `find_similar_movies(title)` — ONE tool call, that's it.
+            Do NOT use search_movies for these queries. Do NOT chain tools.
+
+            How to use the tool:
+              • Pass the reference movie's title — distinguishing words only, lowercase.
+                e.g. "interstellar", "memento", "lord of the rings".
+              • The tool returns up to 10 movies that share genres with the reference,
+                with the reference movie itself already excluded.
+              • If the result list is EMPTY, the reference movie isn't in the archive.
+                Return picks=[] with message:
+                "<Title> isn't in your archive, so I can't find similar picks. Try another reference."
+
+            From the returned candidates, in STEP 3 below, prefer movies whose `keywords`
+            or themes overlap with the user's reference (e.g. for "like Interstellar":
+            prefer space, time, family, scientific themes).
+
             ───── EXAMPLES OF CORRECT VS INCORRECT TOOL CALLS ─────
             
             User: "not famous romantic movies"
@@ -130,6 +157,24 @@ public class SearchService {
             
             User: "dark thriller themed around grief"
               ✅ RIGHT: genres=[Thriller], topic="grief"
+
+            User: "movies like Interstellar"
+              ❌ WRONG: search_movies(titleLike="interstellar")
+                       (titleLike returns Interstellar itself, not similar movies)
+              ❌ WRONG: search_movies(genres=[Science Fiction])
+                       (guessing genres without consulting the reference movie)
+              ❌ WRONG: find_similar_movies + search_movies in a chain
+                       (find_similar_movies already returns the candidates — no second call needed)
+              ✅ RIGHT: find_similar_movies(title="interstellar")
+                       → returns up to 10 candidates that share genres with Interstellar.
+                       Pick 3–5 in STEP 3, preferring keyword overlap (space, time, family).
+
+            User: "Memento type movies"
+              ✅ RIGHT: find_similar_movies(title="memento")
+                       Pick non-linear / mind-bending / mystery films from the result.
+
+            User: "something in the vein of Saltburn"
+              ✅ RIGHT: find_similar_movies(title="saltburn")
             
             STEP 2 — Receive candidate movies from the tool. Each candidate has:
               • title       — canonical name
@@ -186,6 +231,10 @@ public class SearchService {
               in the library matching that — want to try something else?"
             • If the user asks for a specific movie by title and it's not in the results, say so plainly.
               DO NOT recommend a different movie unless they asked for alternatives.
+            • For "similar to X" queries: if find_similar_movies returns empty, the reference
+              movie isn't in the archive. Return picks=[] with a clear message naming the
+              missing title. Do NOT fall back to genre-guessing without the reference data —
+              that produces generic, unhelpful results.
             • Never recommend a movie that wasn't returned by `search_movies`. The library is the only
               source of truth — your training data may know about movies the user does not own.
             • If the user's request is vague ("recommend something", "I'm bored"), call the tool with
@@ -213,6 +262,7 @@ public class SearchService {
     }
 
     public RecommendationResult askForRecommendations(String userMessage) {
+        log.info("User asked for [{}}", userMessage);
         try {
             AiPicks aiPicks = chatClient.prompt()
                     .user(userMessage)

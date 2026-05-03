@@ -20,7 +20,7 @@ public class AiObservationConfig {
                 new ObservationHandler<Observation.Context>() {
                     @Override
                     public void onStop(Observation.Context ctx) {
-                       // log.info("Obs [{}] keys={}", ctx.getName(), ctx.getAllKeyValues());
+                        log.info("Obs [{}] keys={}", ctx.getName(), ctx.getAllKeyValues());
                     }
 
                     @Override

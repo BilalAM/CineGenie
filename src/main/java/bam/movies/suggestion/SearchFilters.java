@@ -19,4 +19,5 @@ public record SearchFilters(
     public enum SortMode {
         POPULAR_FIRST, OBSCURE_FIRST, HIGHEST_RATED, LOWEST_RATED
     }
+
 }
